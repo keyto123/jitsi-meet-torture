@@ -50,9 +50,31 @@ public class MalleusJitsificus
         = "org.jitsi.malleus.duration";
     public static final String ROOM_NAME_PREFIX_PNAME
         = "org.jitsi.malleus.room_name_prefix";
+    public static final String ROOM_NAME_SUFFIX_PNAME
+        = "org.jitsi.malleus.room_name_suffix";
     public static final String REGIONS_PNAME
             = "org.jitsi.malleus.regions";
 
+    private void shareScreen() {
+        ensureOneParticipant();
+
+        String extId
+            = (String) getParticipant1().getConfigValue(
+                "desktopSharingChromeExtId");
+
+
+        if (extId == null)
+        {
+            throw new SkipException(
+                "No Desktop sharing configuration detected. Disabling test.");
+        }
+        System.out.println("oi");
+
+        ensureTwoParticipants(
+            null, null, null,
+            new WebParticipantOptions().setChromeExtensionId(extId));
+        getParticipant2().getToolbar().clickDesktopSharingButton();
+    }
 
     @DataProvider(name = "dp", parallel = true)
     public Object[][] createData(ITestContext context)
@@ -91,6 +113,11 @@ public class MalleusJitsificus
             roomNamePrefix = "anvil-";
         }
 
+        String roomNameSuffix = System.getProperty(ROOM_NAME_SUFFIX_PNAME);
+        if (roomNameSuffix == null) {
+            roomNameSuffix = "";
+        }
+
         String enableP2pStr = System.getProperty(ENABLE_P2P_PNAME);
         boolean enableP2p
             = enableP2pStr == null || Boolean.parseBoolean(enableP2pStr);
@@ -112,7 +139,7 @@ public class MalleusJitsificus
         Object[][] ret = new Object[numConferences][4];
         for (int i = 0; i < numConferences; i++)
         {
-            String roomName = roomNamePrefix + i;
+            String roomName = roomNamePrefix + i + roomNameSuffix;
             JitsiMeetUrl url
                 = participants.getJitsiMeetUrl()
                 .setRoomName(roomName)
@@ -165,6 +192,8 @@ public class MalleusJitsificus
     {
         JitsiMeetUrl _url = url.copy();
 
+        MalleusJitsificus instance = this;
+
         Thread joinThread = new Thread(() -> {
 
             WebParticipantOptions ops
@@ -187,6 +216,7 @@ public class MalleusJitsificus
 
             WebParticipant participant = participants.createParticipant("web.participant" + (i + 1), ops);
             participant.joinConference(_url);
+            // instance.shareScreen();
 
             try
             {

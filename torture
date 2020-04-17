@@ -1,0 +1,16 @@
+#!/bin/bash
+
+token=""
+
+mvn \
+-Dthreadcount=1 \
+-Dorg.jitsi.malleus.conferences=2 \
+-Dorg.jitsi.malleus.participants=3 \
+-Dorg.jitsi.malleus.senders=10 \
+-Dorg.jitsi.malleus.duration=300 \
+-Dorg.jitsi.malleus.room_name_prefix="mytestroom" \
+-Dorg.jitsi.malleus.room_name_suffix="?jwt=$token" \
+-Djitsi-meet.tests.toRun=MalleusJitsificus \
+-Dremote.resource.path=/usr/share/jitsi-meet-torture \
+-Djitsi-meet.instance.url=https://dev1.sessao.scisapp.com \
+test
